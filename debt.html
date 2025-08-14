@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sleep Debt Awareness</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ffdde1, #ee9ca7);
+            text-align: center;
+        }
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            margin: 50px auto;
+            width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .btn {
+            background: #ff69b4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .btn:hover { background: #ff1493; }
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .progress-bar-container {
+            width: 90%;
+            background: #ddd;
+            border-radius: 20px;
+            margin: 15px auto;
+            height: 25px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #36A2EB;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 25px;
+            transition: width 0.7s ease-in-out, background 0.5s;
+        }
+        .list-box {
+            text-align: left;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .list-box h3 {
+            margin-top: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<section id="welcome" class="page active">
+    <div class="container">
+        <h1>Welcome to Sleep Debt Awareness</h1>
+        <p>Learn about your sleep health.</p>
+        <button class="btn" onclick="showPage('about')">Start →</button>
+    </div>
+</section>
+
+<!-- PAGE 2 -->
+<section id="about" class="page">
+    <div class="container">
+        <h2>About Sleep Debt</h2>
+        <p>Sleep debt is the gap between the amount of sleep you need and what you actually get.</p>
+        <ul style="text-align:left;">
+            <li>Better sleep improves mood and focus.</li>
+            <li>Reduces heart risk and stress.</li>
+            <li>Strengthens immunity.</li>
+        </ul>
+        <button class="btn" onclick="showPage('calculator')">Go to Calculator →</button>
+        <button class="btn" onclick="showPage('welcome')">← Back</button>
+    </div>
+</section>
+
+<!-- PAGE 3 -->
+<section id="calculator" class="page">
+    <div class="container">
+        <h2>Sleep Debt Calculator</h2>
+        <input type="number" id="age" placeholder="Enter your age">
+        <input type="number" step="0.1" id="sleep" placeholder="Enter your actual sleep hours">
+        <button class="btn" onclick="calculateDebt()">Calculate</button>
+
+        <div id="output"></div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="list-box" id="effects"></div>
+        <div class="list-box" id="prevention"></div>
+
+        <button class="btn" onclick="showPage('about')">← Back</button>
+    </div>
+</section>
+
+<script>
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(page => {
+        page.style.display = "none";
+        page.classList.remove("active");
+    });
+    const target = document.getElementById(pageId);
+    target.style.display = "block";
+    setTimeout(() => target.classList.add("active"), 10);
+}
+
+function recommendedSleep(age) {
+    if (age >= 18 && age <= 64) return 8;
+    else if (age > 64) return 7;
+    else return 9;
+}
+
+function calculateDebt() {
+    const age = parseInt(document.getElementById("age").value);
+    const sleep = parseFloat(document.getElementById("sleep").value);
+
+    const outputDiv = document.getElementById("output");
+    const effectsDiv = document.getElementById("effects");
+    const preventionDiv = document.getElementById("prevention");
+    const progressBar = document.getElementById("progressBar");
+
+    if (isNaN(age) || isNaN(sleep)) {
+        outputDiv.innerHTML = "<p>Please enter valid numbers.</p>";
+        effectsDiv.innerHTML = "";
+        preventionDiv.innerHTML = "";
+        return;
+    }
+
+    const rec = recommendedSleep(age);
+    const debt = Math.max(0, rec - sleep);
+
+    let risk, color, effects, prevention;
+    if (debt === 0) {
+        risk = "No Sleep Debt (Low Risk)";
+        color = "#4CAF50";
+        effects = ["Good energy", "Strong focus", "Better immunity", "Stable mood", "Healthy heart"];
+        prevention = ["Maintain your sleep schedule", "Avoid late-night screens"];
+    } else if (debt <= 1) {
+        risk = "Mild Sleep Debt";
+        color = "#FFEB3B";
+        effects = ["Slight fatigue","Decreased focus","Mild mood changes","Slower reaction time","More caffeine needed"];
+        prevention = ["Go to bed 30 mins earlier", "Limit phone use before bed"];
+    } else if (debt <= 2) {
+        risk = "Moderate Sleep Debt";
+        color = "#FF9800";
+        effects = ["Noticeable fatigue","Weakened immunity","Irritability","Memory lapses","Reduced productivity"];
+        prevention = ["Create a fixed bedtime", "Avoid heavy meals before sleep"];
+    } else {
+        risk = "Severe Sleep Debt";
+        color = "#F44336";
+        effects = ["Severe tiredness","High accident risk","Hormonal imbalance","Mental confusion","Heart disease risk"];
+        prevention = ["Seek medical advice if chronic", "Take short naps to recover"];
+    }
+
+    outputDiv.innerHTML = `
+        <p>Recommended Sleep: ${rec} hrs<br>
+        Your Sleep Debt: ${debt.toFixed(1)} hrs<br>
+        Risk Level: ${risk}</p>
+    `;
+
+    const progressValue = Math.min((debt / rec) * 100, 100);
+    progressBar.style.width = progressValue + "%";
+    progressBar.style.background = color;
+    progressBar.innerText = Math.round(progressValue) + "%";
+
+    effectsDiv.innerHTML = "<h3>Side Effects:</h3><ul>" +
+        effects.map(e => `<li>${e}</li>`).join("") + "</ul>";
+
+    preventionDiv.innerHTML = "<h3>Prevention Tips:</h3><ul>" +
+        prevention.map(p => `<li>${p}</li>`).join("") + "</ul>";
+}
+</script>
+
+</body>
+</html>
